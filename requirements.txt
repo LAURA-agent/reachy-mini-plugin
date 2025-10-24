@@ -1,0 +1,4 @@
+# Reachy Mini Claude Code Plugin Requirements
+
+# HTTP requests for API communication
+requests>=2.31.0
