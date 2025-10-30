@@ -1,17 +1,12 @@
 {
-  "name": "marketplace",
+  "name": "reachy-mini-marketplace",
   "owner": {
     "name": "LAURA-agent"
   },
   "plugins": [
     {
-      "name": "claude-to-speech",
-      "source": "./claude-to-speech",
-      "description": "Voice-first TTS interaction for Claude Code"
-    },
-    {
       "name": "reachy-mini",
-      "source": "./reachy-mini",
+      "source": "./",
       "description": "Automatic emotion-based movements for Reachy Mini"
     }
   ]
