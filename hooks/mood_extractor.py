@@ -11,7 +11,10 @@ import time
 import random
 import requests
 
-# Daemon configuration
+# Tracking panel mood endpoint (preferred - uses MovementManager queue)
+TRACKING_PANEL_URL = "http://localhost:5002"
+
+# Daemon configuration (fallback - bypasses MovementManager, may cause race conditions)
 DAEMON_URL = "http://localhost:8100"
 DATASET = "pollen-robotics/reachy-mini-emotions-library"
 
@@ -59,6 +62,11 @@ MOOD_CATEGORIES = {
     "energetic": [
         "electric1", "enthusiastic1", "enthusiastic2", "dance1", "dance2",
         "dance3", "laughing1", "laughing2", "yes1", "come1"
+    ],
+
+    "playful": [
+        "laughing1", "laughing2", "dance1", "dance2", "dance3",
+        "cheerful1", "enthusiastic1", "oops1", "oops2"
     ]
 }
 
@@ -149,6 +157,32 @@ def play_mood_loop(mood_name, max_duration=60):
 
     print(f"[MOOD] Mood loop complete: {mood_name}, {moves_played} moves in {elapsed:.1f}s", file=sys.stderr)
 
+def is_tracking_panel_available():
+    """Check if tracking panel mood endpoint is available."""
+    try:
+        response = requests.get(f"{TRACKING_PANEL_URL}/status", timeout=0.5)
+        return response.status_code == 200
+    except:
+        return False
+
+def trigger_tracking_panel_mood(mood_name):
+    """
+    Trigger mood via tracking panel endpoint (uses MovementManager queue).
+    Returns True if successful, False otherwise.
+    """
+    try:
+        url = f"{TRACKING_PANEL_URL}/trigger_mood?mood={mood_name}"
+        response = requests.get(url, timeout=2)
+        if response.status_code == 200:
+            print(f"[MOOD] Triggered via tracking panel: {mood_name}", file=sys.stderr)
+            return True
+        else:
+            print(f"[MOOD] Tracking panel returned: HTTP {response.status_code}", file=sys.stderr)
+            return False
+    except requests.exceptions.RequestException as e:
+        print(f"[MOOD] Tracking panel unavailable: {e}", file=sys.stderr)
+        return False
+
 def main():
     """
     Read stdin, extract mood marker, and run continuous mood loop.
@@ -163,7 +197,16 @@ def main():
         # No mood requested - silent exit
         sys.exit(0)
 
-    # Run the mood loop
+    # Try tracking panel first (preferred - uses MovementManager queue)
+    if is_tracking_panel_available():
+        print(f"[MOOD] Using tracking panel endpoint (coordinated with breathing)", file=sys.stderr)
+        if trigger_tracking_panel_mood(mood):
+            sys.exit(0)
+        else:
+            print(f"[MOOD] Tracking panel trigger failed, falling back to daemon", file=sys.stderr)
+
+    # Fallback to daemon API (may cause race condition with breathing)
+    print(f"[MOOD] Using daemon API (WARNING: may conflict with breathing)", file=sys.stderr)
     play_mood_loop(mood)
 
     sys.exit(0)

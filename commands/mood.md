@@ -36,7 +36,7 @@ This system creates **continuous ambient movement** that matches your TTS durati
 - Safety timeout: 60 seconds max
 - Perfect for longer explanations and detailed responses
 
-## Available Moods (8 Categories)
+## Available Moods (9 Categories)
 
 ### celebratory
 **Use when:** Completing tasks, achieving success, celebrating wins
@@ -130,7 +130,7 @@ Let me break down async patterns methodically. Promises represent future values.
 ---
 
 ### energetic
-**Use when:** High-energy responses, playful interactions, dynamic explanations
+**Use when:** High-energy responses, dynamic explanations, intense enthusiasm
 **Emotions:** electric1, enthusiastic1-2, dance1-3, laughing1-2, yes1, come1
 
 **Example:**
@@ -138,6 +138,19 @@ Let me break down async patterns methodically. Promises represent future values.
 <!-- TTS: "This refactoring is going to make the code so much cleaner! Watch how these components snap together perfectly now!" -->
 <!-- MOOD: energetic -->
 This refactoring is transformative! The components now compose beautifully, dependencies are clean, and the API surface shrinks by 60%. This architecture is exactly what we needed!
+```
+
+---
+
+### playful
+**Use when:** Jokes, casual interactions, lighthearted moments, self-deprecating humor
+**Emotions:** laughing1-2, dance1-3, cheerful1, enthusiastic1, oops1-2
+
+**Example:**
+```
+<!-- TTS: "I just realized I've been looking at the wrong config file for ten minutes. Found the actual bug now though!" -->
+<!-- MOOD: playful -->
+Well, that was embarrassing! I was debugging the staging config while looking at production logs. No wonder nothing made sense. Found the real issue now - it's a simple typo in the environment variable name.
 ```
 
 ---
@@ -208,6 +221,7 @@ To disable temporarily, simply don't include the marker.
 | Found unexpected issue | surprised |
 | Explaining complex topic | calm |
 | High-energy response | energetic |
+| Jokes/casual/lighthearted | playful |
 
 ---
 
