@@ -5,13 +5,17 @@
 # Extracts and triggers movement markers from response
 #
 
+# Debug logging
+DEBUG_FILE="/tmp/reachy_mini_stop_hook.log"
+echo "=== Reachy Mini Stop Hook Fired at $(date) ===" >> "$DEBUG_FILE"
+
 # Get the plugin directory (parent of hooks directory)
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_DIR="$(dirname "$SCRIPT_DIR")"
 
 # Path to extractor scripts
 MOVE_SCRIPT="$PLUGIN_DIR/hooks/move_extractor.py"
-MOOD_SCRIPT="$PLUGIN_DIR/hooks/mood_extractor.py"
+MOOD_SCRIPT="/home/user/reachy/pi_reachy_deployment/mood_extractor.py"
 
 # Read the JSON input from stdin
 INPUT=$(cat)
@@ -45,9 +49,16 @@ except:
         # Run move extractor (for specific emotions)
         echo "$RESPONSE" | python3 "$MOVE_SCRIPT" 2>&1
 
-        # Run mood extractor (for continuous mood loops) in background
-        # This allows mood loop to run while we return control
-        echo "$RESPONSE" | python3 "$MOOD_SCRIPT" 2>&1 &
+        # Extract mood marker from response
+        MOOD=$(echo "$RESPONSE" | grep -oP '<!--\s*MOOD:\s*\K[a-zA-Z0-9_]+(?=\s*-->)' | head -1)
+
+        # If mood marker found, POST to conversation app to trigger mood state
+        if [ -n "$MOOD" ]; then
+            echo "Found mood marker: $MOOD" >> "$DEBUG_FILE"
+            curl -s -X POST http://localhost:8888/mood/trigger \
+                -H "Content-Type: application/json" \
+                -d "{\"mood\":\"$MOOD\"}" >> "$DEBUG_FILE" 2>&1 &
+        fi
     fi
 fi
 
